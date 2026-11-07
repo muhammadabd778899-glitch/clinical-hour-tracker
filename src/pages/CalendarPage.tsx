@@ -182,6 +182,7 @@ export function CalendarPage() {
     <div>
       <PageHeader
         title="Calendar"
+        eyebrow="Schedule"
         description="One place for your activities, supervision and upcoming deadlines."
         actions={
           <div className="flex flex-wrap gap-2">

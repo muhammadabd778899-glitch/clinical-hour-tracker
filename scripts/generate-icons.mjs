@@ -55,9 +55,21 @@ function encodePng(size, pixels) {
   ]);
 }
 
-const TEAL = [0x14, 0x7d, 0x78, 255];
+const BG_TOP = [0x0a, 0x2b, 0x26, 255];
+const BG_BOTTOM = [0x0d, 0x5b, 0x51, 255];
+const GOLD = [0xd7, 0xb3, 0x6a, 255];
 const WHITE = [255, 255, 255, 255];
 const CLEAR = [0, 0, 0, 0];
+
+function background(y, size) {
+  const t = size <= 1 ? 0 : y / (size - 1);
+  return [
+    Math.round(BG_TOP[0] + (BG_BOTTOM[0] - BG_TOP[0]) * t),
+    Math.round(BG_TOP[1] + (BG_BOTTOM[1] - BG_TOP[1]) * t),
+    Math.round(BG_TOP[2] + (BG_BOTTOM[2] - BG_TOP[2]) * t),
+    255,
+  ];
+}
 
 function draw(size, { maskable = false } = {}) {
   const px = Buffer.alloc(size * size * 4);
@@ -87,7 +99,7 @@ function draw(size, { maskable = false } = {}) {
         const dy = ly - cy;
         if (dx * dx + dy * dy > radius * radius) continue;
       }
-      set(x, y, TEAL);
+      set(x, y, background(ly + inset, size));
     }
   }
 
@@ -122,7 +134,8 @@ function draw(size, { maskable = false } = {}) {
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      if (inRing(x, y) || hand(x, y)) set(x, y, WHITE);
+      if (inRing(x, y)) set(x, y, GOLD);
+      else if (hand(x, y)) set(x, y, WHITE);
     }
   }
 
@@ -130,7 +143,7 @@ function draw(size, { maskable = false } = {}) {
   const pin = Math.max(2, size * 0.045);
   for (let y = Math.floor(c - pin); y <= c + pin; y++) {
     for (let x = Math.floor(c - pin); x <= c + pin; x++) {
-      if (Math.hypot(x - c, y - c) <= pin) set(x, y, WHITE);
+      if (Math.hypot(x - c, y - c) <= pin) set(x, y, GOLD);
     }
   }
 

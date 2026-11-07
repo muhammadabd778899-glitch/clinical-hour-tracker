@@ -24,6 +24,7 @@ export function QualityPage() {
     <div>
       <PageHeader
         title="Record Quality Check"
+        eyebrow="Data health"
         description="A read-only review of your records. Nothing here changes your data — every warning links to the record so you can decide what to do."
         actions={
           <Link to="/activities" className="btn-secondary">

@@ -66,6 +66,7 @@ export function RequirementsPage() {
     <div>
       <PageHeader
         title="Requirements"
+        eyebrow="Milestones"
         description="Set your own targets — hours, supervision and timelines — exactly as your program or board requires of you."
         actions={
           <Button

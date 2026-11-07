@@ -1,12 +1,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'gold';
 
 const variantClass: Record<Variant, string> = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
   danger: 'btn-danger',
   ghost: 'btn-ghost',
+  gold: 'btn-gold',
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

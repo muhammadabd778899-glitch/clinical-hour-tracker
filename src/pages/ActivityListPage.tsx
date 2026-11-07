@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/Card';
 import { Badge, EmptyState } from '@/components/ui/feedback';
@@ -74,6 +74,11 @@ export function ActivityListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [quickOpen, setQuickOpen] = useState(false);
 
+  // The header's "Quick log" shortcut lands here with ?quick=1.
+  useEffect(() => {
+    if (searchParams.get('quick') === '1') setQuickOpen(true);
+  }, [location.key, searchParams]);
+
   const q = searchParams.get('q') ?? '';
   const type = searchParams.get('type') ?? '';
   const category = searchParams.get('category') ?? '';
@@ -102,6 +107,7 @@ export function ActivityListPage() {
     <div>
       <PageHeader
         title="Activity Log"
+        eyebrow="Clinical record"
         description="Every clinical, supervision and professional activity you have recorded."
         actions={
           <>

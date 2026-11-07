@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { Icon, type IconName } from './Icon';
 
 export function Spinner({ label = 'Loading' }: { label?: string }) {
   return (
@@ -27,24 +28,29 @@ export function EmptyState({
   actionLabel,
   actionTo,
   onAction,
+  icon = 'compass',
 }: {
   title: string;
   description: string;
   actionLabel?: string;
   actionTo?: string;
   onAction?: () => void;
+  icon?: IconName;
 }) {
   return (
-    <div className="card flex flex-col items-center gap-2 p-8 text-center">
-      <h3>{title}</h3>
+    <div className="card flex flex-col items-center gap-3 p-10 text-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-app-primary-light text-app-primary">
+        <Icon name={icon} size={24} />
+      </span>
+      <h3 className="font-display text-xl font-semibold">{title}</h3>
       <p className="max-w-md text-sm text-app-muted">{description}</p>
       {actionLabel && actionTo && (
-        <Link to={actionTo} className="btn-primary mt-2">
+        <Link to={actionTo} className="btn-primary mt-1">
           {actionLabel}
         </Link>
       )}
       {actionLabel && onAction && !actionTo && (
-        <button type="button" className="btn-primary mt-2" onClick={onAction}>
+        <button type="button" className="btn-primary mt-1" onClick={onAction}>
           {actionLabel}
         </button>
       )}
@@ -79,17 +85,25 @@ export function Badge({
   tone = 'neutral',
 }: {
   children: ReactNode;
-  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'gold';
 }) {
   const tones = {
-    neutral: 'bg-gray-100 text-app-muted',
+    neutral: 'bg-app-bg text-app-muted ring-1 ring-inset ring-app-border',
     success: 'bg-app-success-light text-app-success',
     warning: 'bg-app-warning-light text-app-warning',
     danger: 'bg-app-danger-light text-app-danger',
     info: 'bg-app-secondary-light text-app-secondary',
+    gold: 'bg-app-gold-light text-app-gold-dark',
   };
   return <span className={`badge ${tones[tone]}`}>{children}</span>;
 }
+
+const BAR_TONES = {
+  primary: 'from-[#0F6B5F] to-[#0D5B51]',
+  secondary: 'from-[#3A7FA2] to-[#2C6B8A]',
+  gold: 'from-[#C99B45] to-[#B98A33]',
+  success: 'from-[#378F6C] to-[#2B7256]',
+} as const;
 
 export function ProgressBar({
   percent,
@@ -98,7 +112,7 @@ export function ProgressBar({
 }: {
   percent: number;
   label: string;
-  tone?: 'primary' | 'secondary';
+  tone?: keyof typeof BAR_TONES;
 }) {
   const clamped = Math.max(0, Math.min(100, percent));
   return (
@@ -108,10 +122,10 @@ export function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={label}
-      className="h-2 w-full overflow-hidden rounded-full bg-gray-100"
+      className="h-2.5 w-full overflow-hidden rounded-full bg-app-border/60"
     >
       <div
-        className={`h-full rounded-full transition-all ${tone === 'primary' ? 'bg-app-primary' : 'bg-app-secondary'}`}
+        className={`h-full rounded-full bg-gradient-to-r ${BAR_TONES[tone]} transition-all duration-500`}
         style={{ width: `${clamped}%` }}
       />
     </div>

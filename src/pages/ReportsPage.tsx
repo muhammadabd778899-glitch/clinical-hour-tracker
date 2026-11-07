@@ -113,6 +113,7 @@ export function ReportsPage() {
 
       <PageHeader
         title="Report Studio"
+        eyebrow="Summaries & exports"
         description="Organised summaries of your hours, supervision, CEUs and target progress — exportable as CSV or a printable PDF."
         actions={
           <>

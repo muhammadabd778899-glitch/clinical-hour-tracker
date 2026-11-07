@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useSettings } from '@/hooks/useData';
 import { updateSettings } from '@/services/settings';
+import { SampleSettingsCard } from '@/components/sample/SampleWorkspace';
 import {
   createBackup,
   parseBackup,
@@ -161,6 +162,7 @@ export function SettingsPage() {
     <div>
       <PageHeader
         title="Settings & Help"
+        eyebrow="Your workspace"
         description="Your profile, backups, storage information and answers to common questions."
       />
 
@@ -212,9 +214,10 @@ export function SettingsPage() {
           </form>
         </Card>
 
+        <SampleSettingsCard />
+
         {/* Backup */}
-        <Card>
-          <div className="flex items-center justify-between">
+        <Card>          <div className="flex items-center justify-between">
             <h2>Backup &amp; restore</h2>
             <Badge tone={online ? 'success' : 'warning'}>{online ? 'Online' : 'Offline'}</Badge>
           </div>

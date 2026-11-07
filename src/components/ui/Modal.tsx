@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { Button } from './Button';
+import { Icon } from './Icon';
 
 interface ModalProps {
   open: boolean;
@@ -29,7 +30,7 @@ export function Modal({ open, title, onClose, children, wide }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-app-text/40 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-app-ink/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -38,14 +39,19 @@ export function Modal({ open, title, onClose, children, wide }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-pop sm:rounded-card ${
+        className={`animate-rise max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-pop sm:rounded-2xl ${
           wide ? 'sm:max-w-2xl' : 'sm:max-w-lg'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-app-border px-5 py-3.5">
-          <h2>{title}</h2>
-          <button type="button" className="btn-ghost px-2 py-1" onClick={onClose} aria-label="Close dialog">
-            <span aria-hidden="true">✕</span>
+        <div className="flex items-center justify-between border-b border-app-border bg-app-bg/40 px-5 py-3.5">
+          <h2 className="font-display text-xl">{title}</h2>
+          <button
+            type="button"
+            className="rounded-lg p-1.5 text-app-muted transition-colors hover:bg-app-primary-light hover:text-app-primary"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            <Icon name="close" size={18} />
           </button>
         </div>
         <div className="px-5 py-4">{children}</div>
@@ -76,7 +82,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Modal open={open} title={title} onClose={onCancel}>
-      <p className="text-sm text-app-text">{message}</p>
+      <p className="text-sm leading-relaxed text-app-text">{message}</p>
       <div className="mt-5 flex justify-end gap-2">
         <Button variant="secondary" onClick={onCancel} disabled={busy}>
           Cancel

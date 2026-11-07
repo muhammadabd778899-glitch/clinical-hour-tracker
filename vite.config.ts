@@ -19,8 +19,8 @@ export default defineConfig({
         short_name: 'Clinical Tracker',
         description:
           'A simple, private clinical progress workspace for hours, supervision, CEUs and milestones — fully offline.',
-        theme_color: '#147D78',
-        background_color: '#F7F8FA',
+        theme_color: '#0D5B51',
+        background_color: '#F6F3EC',
         display: 'standalone',
         start_url: base,
         scope: base,

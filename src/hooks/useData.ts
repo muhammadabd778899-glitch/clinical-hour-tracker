@@ -13,6 +13,7 @@ import { DEFAULT_SETTINGS } from '@/domain/types';
 import type { Activity, Category, CeURecord, RenewalPeriod, Requirement } from '@/domain/types';
 import { runQualityCheckForUser } from '@/services/quality';
 import type { QualityIssue } from '@/domain/quality';
+import { getSampleState, type SampleState } from '@/services/sample';
 
 const EMPTY_ACTIVITIES: Activity[] = [];
 const EMPTY_CATEGORIES: Category[] = [];
@@ -74,11 +75,24 @@ export function useCeu(id: string | undefined): CeURecord | null | undefined {
   );
 }
 
-/** Overall record counts for the Overview empty state. */
-export function useCounts(): { activities: number; ceus: number; requirements: number } {
+/** Overall record counts for empty states and the sample workspace card. */
+export function useCounts(): {
+  activities: number;
+  ceus: number;
+  requirements: number;
+  renewalPeriods: number;
+} {
   const db = getDB();
   const activities = useLiveQuery(() => db.activities.count(), [], 0) ?? 0;
   const ceus = useLiveQuery(() => db.ceus.count(), [], 0) ?? 0;
   const requirements = useLiveQuery(() => db.requirements.count(), [], 0) ?? 0;
-  return { activities, ceus, requirements };
+  const renewalPeriods = useLiveQuery(() => db.renewalPeriods.count(), [], 0) ?? 0;
+  return { activities, ceus, requirements, renewalPeriods };
+}
+
+const INACTIVE_SAMPLE: SampleState = { active: false, loadedAt: null };
+
+/** Whether the clearly-labelled demo profile is currently loaded. */
+export function useSampleState(): SampleState {
+  return useLiveQuery(() => getSampleState(), [], INACTIVE_SAMPLE) ?? INACTIVE_SAMPLE;
 }

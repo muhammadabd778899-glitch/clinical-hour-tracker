@@ -10,80 +10,149 @@
 
   body {
     @apply bg-app-bg text-app-text antialiased;
+    background-image:
+      radial-gradient(1100px 520px at 8% -8%, rgba(13, 91, 81, 0.1), transparent 62%),
+      radial-gradient(900px 480px at 100% -4%, rgba(185, 138, 51, 0.12), transparent 58%);
+    background-attachment: fixed;
     font-family: theme('fontFamily.sans');
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
   * {
     @apply border-app-border;
   }
 
+  ::selection {
+    background: rgba(185, 138, 51, 0.28);
+  }
+
   :focus-visible {
-    outline: 2px solid #147d78;
+    outline: 2px solid theme('colors.app.primary');
     outline-offset: 2px;
   }
 
   h1 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply font-display text-[2rem] font-semibold leading-[1.12] tracking-[-0.015em] sm:text-[2.35rem];
   }
 
   h2 {
-    @apply text-lg font-semibold;
+    @apply font-display text-[1.3rem] font-semibold leading-tight tracking-[-0.01em];
   }
 
   h3 {
-    @apply text-base font-semibold;
+    @apply text-base font-semibold tracking-[-0.005em];
   }
 }
 
 @layer components {
+  .page-shell {
+    animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   .card {
     @apply rounded-card border border-app-border bg-app-surface shadow-card;
   }
 
+  .card-interactive {
+    @apply card transition duration-200 hover:-translate-y-0.5 hover:border-app-primary/30 hover:shadow-lift;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-app-gold;
+  }
+
+  .display {
+    font-family: theme('fontFamily.display');
+    letter-spacing: -0.015em;
+  }
+
   .input {
-    @apply w-full rounded-lg border border-app-border bg-white px-3 py-2 text-sm text-app-text placeholder:text-app-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-primary/20 disabled:bg-gray-50;
+    @apply w-full rounded-xl border border-app-border bg-white px-3 py-2.5 text-sm text-app-text shadow-[inset_0_1px_1px_rgba(20,32,28,0.03)] placeholder:text-app-muted/80 focus:border-app-primary focus:outline-none focus:ring-4 focus:ring-app-primary/10 disabled:bg-app-bg;
   }
 
   .label {
-    @apply mb-1 block text-sm font-medium text-app-text;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-[0.08em] text-app-muted;
   }
 
   .hint {
-    @apply mt-1 text-xs text-app-muted;
+    @apply mt-1.5 text-xs text-app-muted;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .btn-primary {
-    @apply btn bg-app-primary text-white hover:bg-app-primary-dark focus-visible:outline-app-primary;
+    @apply btn bg-app-primary text-white shadow-[0_10px_24px_-14px_rgba(13,91,81,0.9)] hover:bg-app-primary-dark hover:shadow-[0_14px_30px_-14px_rgba(13,91,81,0.95)] focus-visible:outline-app-primary;
   }
 
   .btn-secondary {
-    @apply btn border border-app-border bg-white text-app-text hover:bg-gray-50 focus-visible:outline-app-primary;
+    @apply btn border border-app-border bg-white text-app-text shadow-[0_1px_2px_rgba(20,32,28,0.04)] hover:border-app-primary/35 hover:bg-app-primary-light/40 hover:text-app-primary focus-visible:outline-app-primary;
   }
 
   .btn-danger {
-    @apply btn bg-app-danger text-white hover:opacity-90 focus-visible:outline-app-danger;
+    @apply btn bg-app-danger text-white shadow-[0_10px_24px_-16px_rgba(178,63,56,0.9)] hover:bg-[#9c352f] focus-visible:outline-app-danger;
   }
 
   .btn-ghost {
-    @apply btn text-app-muted hover:bg-gray-100 hover:text-app-text;
+    @apply btn text-app-muted hover:bg-app-primary-light/60 hover:text-app-primary;
+  }
+
+  .btn-gold {
+    @apply btn bg-app-gold text-app-ink shadow-[0_10px_26px_-14px_rgba(185,138,51,0.9)] hover:bg-[#c79841] focus-visible:outline-app-gold;
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-[0.01em];
   }
 
   .nav-link {
-    @apply whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium text-app-muted transition-colors hover:border-app-primary hover:text-app-text;
+    @apply relative flex items-center whitespace-nowrap px-3 text-sm font-medium text-[#BFCFC9] transition-colors hover:text-white;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-app-gold opacity-0 transition-opacity;
+  }
+
+  .nav-link:hover::after {
+    @apply opacity-40;
   }
 
   .nav-link-active {
-    @apply border-app-primary text-app-primary hover:text-app-primary;
+    @apply text-white;
+  }
+
+  .nav-link-active::after {
+    @apply opacity-100;
+  }
+
+  .hero-panel {
+    background:
+      radial-gradient(120% 140% at 88% -10%, rgba(185, 138, 51, 0.22), transparent 55%),
+      radial-gradient(90% 120% at 8% 110%, rgba(56, 160, 139, 0.24), transparent 60%),
+      linear-gradient(135deg, #0a2b26 0%, #073f38 48%, #0a4f45 100%);
+  }
+
+  .hairline {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-app-border to-transparent;
+  }
+
+  .stat-value {
+    @apply font-display text-[2.4rem] font-semibold leading-none tracking-[-0.02em];
+  }
+
+  .link-quiet {
+    @apply text-sm font-semibold text-app-primary underline decoration-app-primary/30 underline-offset-4 transition hover:decoration-app-primary;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell,
+  .card-interactive {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

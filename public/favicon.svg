@@ -1,5 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Clinical Tracker">
-  <rect width="64" height="64" rx="14" fill="#147D78" />
-  <circle cx="32" cy="32" r="17" fill="none" stroke="#FFFFFF" stroke-width="4" />
-  <path d="M32 21v11l7 5" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="All in One Clinical Tracker">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0A2B26" />
+      <stop offset="1" stop-color="#0D5B51" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <circle cx="32" cy="32" r="17" fill="none" stroke="#D7B36A" stroke-width="3.5" />
+  <path d="M32 20.5V32l7.5 5.5" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="32" cy="32" r="2.4" fill="#D7B36A" />
 </svg>

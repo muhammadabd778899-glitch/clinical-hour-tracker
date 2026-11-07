@@ -1,9 +1,20 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { PageHeader, Card } from '@/components/ui/Card';
-import { Badge, EmptyState, ProgressBar } from '@/components/ui/feedback';
-import { useActivities, useCeus, useQualityIssues, useRenewalPeriods, useRequirements, useSettings, useCategories } from '@/hooks/useData';
+import { Card, StatTile } from '@/components/ui/Card';
+import { Badge, ProgressBar } from '@/components/ui/feedback';
+import { Icon } from '@/components/ui/Icon';
+import { SampleStartCard } from '@/components/sample/SampleWorkspace';
+import {
+  useActivities,
+  useCategories,
+  useCeus,
+  useQualityIssues,
+  useRenewalPeriods,
+  useRequirements,
+  useSampleState,
+  useSettings,
+} from '@/hooks/useData';
 import { summarizeActivities } from '@/domain/summary';
 import { allRequirementProgress } from '@/domain/progress';
 import { renewalProgress } from '@/domain/ceu';
@@ -19,6 +30,7 @@ export function OverviewPage() {
   const ceus = useCeus();
   const periods = useRenewalPeriods();
   const settings = useSettings();
+  const sample = useSampleState();
   const issues = useQualityIssues();
 
   const summary = useMemo(
@@ -79,98 +91,139 @@ export function OverviewPage() {
   const clinicalTargetRow = progressRows.find((r) => r.requirement.kind === 'clinical_total');
   const clinicalTargetLabel = clinicalTargetRow?.progress.hasTarget
     ? `of ${formatHoursDecimal(clinicalTargetRow.progress.targetMinutes)} target`
-    : 'no target set';
+    : 'no target set yet';
+  const activePeriod = activePeriods.find((p) => p.status === 'active');
+  const creditTotal = activePeriod?.completedCredits ?? Math.round(ceus.reduce((s, c) => s + c.credits, 0) * 100) / 100;
 
   return (
     <div>
-      <PageHeader
-        title="Overview"
-        description={
-          settings?.displayName
-            ? `Welcome back, ${settings.displayName}. Here is your progress at a glance.`
-            : 'Your clinical progress at a glance — all data stays on this device.'
-        }
-        actions={
-          <>
-            <Link to="/activities/new?type=clinical" className="btn-primary">
-              Log activity
-            </Link>
-            <Link to="/activities/new?type=supervision" className="btn-secondary">
-              Log supervision
-            </Link>
-            <Link to="/ceus/new" className="btn-secondary">
-              Add CEU
-            </Link>
-          </>
-        }
-      />
+      <section className="hero-panel relative mb-5 overflow-hidden rounded-2xl px-5 py-7 text-white shadow-hero sm:px-8 sm:py-9">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full border border-white/10" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full border border-app-gold/20" />
+        <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="eyebrow text-app-gold">
+              {settings?.profession || 'Clinical progress workspace'}
+            </p>
+            <h1 className="mt-2 text-white">
+              {settings?.displayName ? `Welcome back, ${settings.displayName}.` : 'Your clinical journey, at a glance.'}
+            </h1>
+            <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-white/70">
+              {hasRecords
+                ? 'Every hour, supervision session and CEU in one calm, private place. Here is where you stand today.'
+                : 'Log one activity to get started — it takes under a minute. Or explore a realistic sample workspace and clear it whenever you like.'}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link to="/activities/new?type=clinical" className="btn-gold">
+                <Icon name="plus" size={16} /> Log activity
+              </Link>
+              <Link to="/activities/new?type=supervision" className="btn-secondary">
+                Log supervision
+              </Link>
+              <Link to="/ceus/new" className="btn-secondary">
+                Add CEU
+              </Link>
+            </div>
+          </div>
 
-      {!hasRecords && (
-        <Card className="mb-4 border-app-primary/30 bg-app-primary-light">
-          <h3 className="text-app-primary">Let’s get you started</h3>
-          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-app-text">
-            <li>
-              Log one activity in the <Link to="/activities" className="font-medium text-app-secondary underline">Activity Log</Link> — it takes under a minute.
-            </li>
-            <li>
-              Add a target in <Link to="/requirements" className="font-medium text-app-secondary underline">Requirements</Link> so you can see progress toward your goal.
-            </li>
-            <li>
-              Check <Link to="/reports" className="font-medium text-app-secondary underline">Reports</Link> whenever you need an organised summary or export.
-            </li>
-          </ol>
-        </Card>
+          {clinicalTargetRow?.progress.hasTarget && (
+            <div className="w-full max-w-xs rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-gold">
+                <span>Current target</span>
+                <span>{clinicalTargetRow.progress.percent}%</span>
+              </div>
+              <p className="mt-2 font-display text-[2rem] font-semibold leading-none text-white">
+                {formatHoursDecimal(clinicalTargetRow.progress.completedMinutes)}
+                <span className="ml-1 text-base font-normal text-white/60">
+                  / {formatHoursDecimal(clinicalTargetRow.progress.targetMinutes)} h
+                </span>
+              </p>
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D7B36A] to-app-gold"
+                  style={{ width: `${Math.min(100, Math.max(0, clinicalTargetRow.progress.percent))}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-white/65">{clinicalTargetRow.requirement.label}</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {!hasRecords && !sample.active && (
+        <div className="mb-5">
+          <SampleStartCard />
+        </div>
       )}
 
-      {/* Stat cards */}
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
+      {!hasRecords && sample.active && (
+        <div className="mb-5 rounded-xl border border-app-gold/30 bg-app-gold-light px-4 py-3 text-sm text-app-text">
+          <span className="font-semibold text-app-gold-dark">Sample workspace is loaded.</span>{' '}
+          Explore the screens below, then remove the demo records from the banner above or from Settings.
+        </div>
+      )}
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile
           label="Total clinical hours"
           value={formatHoursDecimal(summary.clinicalMinutes)}
-          sub={clinicalTargetLabel}
+          hint={clinicalTargetLabel}
+          icon="clock"
+          tone="primary"
           footer={`Direct ${formatHoursDecimal(summary.directMinutes)} · Indirect ${formatHoursDecimal(summary.indirectMinutes)}`}
         />
-        <StatCard
+        <StatTile
           label="Supervision"
           value={formatHoursDecimal(summary.supervisionMinutes)}
-          sub="hours recorded"
+          hint="hours recorded"
+          icon="pulse"
+          tone="secondary"
           footer={`Individual ${formatDuration(summary.individualSupervisionMinutes)} · Group ${formatDuration(summary.groupSupervisionMinutes)}`}
         />
-        <StatCard
+        <StatTile
           label="CEU credits"
-          value={String(
-            activePeriods.find((p) => p.status === 'active')?.completedCredits ??
-              Math.round(ceus.reduce((s, c) => s + c.credits, 0) * 100) / 100,
-          )}
-          sub={
-            activePeriods.find((p) => p.status === 'active')
-              ? `of ${activePeriods.find((p) => p.status === 'active')!.targetCredits} in current period`
-              : 'total recorded'
-          }
+          value={String(creditTotal)}
+          hint={activePeriod ? `of ${activePeriod.targetCredits} this cycle` : 'total recorded'}
+          icon="award"
+          tone="gold"
           footer={`${ceus.length} CEU record${ceus.length === 1 ? '' : 's'}`}
         />
-        <StatCard
+        <StatTile
           label="Record quality"
           value={quality.total === 0 ? 'All clear' : String(quality.total)}
-          sub={quality.total === 0 ? 'no issues detected' : `${quality.errors} to fix · ${quality.warnings} to review`}
-          footer={<Link to="/quality" className="text-app-secondary underline">Open quality check</Link>}
+          hint={quality.total === 0 ? 'no issues detected' : `${quality.errors} to fix · ${quality.warnings} to review`}
+          icon={quality.total === 0 ? 'shield' : 'warning'}
+          tone={quality.total === 0 ? 'primary' : 'gold'}
+          footer={
+            <Link to="/quality" className="font-semibold text-app-primary underline decoration-app-primary/30 underline-offset-4">
+              Open quality check
+            </Link>
+          }
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Clinical Journey Map */}
         <Card className="lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between">
-            <h2>Clinical Journey Map</h2>
-            <Link to="/requirements" className="text-sm text-app-secondary underline">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <div>
+              <p className="eyebrow">Milestones</p>
+              <h2 className="mt-1">Clinical journey map</h2>
+            </div>
+            <Link to="/requirements" className="link-quiet">
               Manage targets
             </Link>
           </div>
 
           {progressRows.length === 0 ? (
-            <p className="text-sm text-app-muted">
-              No targets yet. Add one in Requirements to see your journey toward each milestone.
-            </p>
+            <div className="rounded-xl border border-dashed border-app-border bg-app-bg/60 px-4 py-6 text-center">
+              <p className="text-sm text-app-muted">
+                No targets yet. Add one in Requirements to see your journey toward each milestone.
+              </p>
+              <Link to="/requirements" className="btn-secondary mt-3">
+                Add your first target
+              </Link>
+            </div>
           ) : (
             <ul className="space-y-5">
               {progressRows.map(({ requirement, progress }) => (
@@ -185,19 +238,17 @@ export function OverviewPage() {
                       {!progress.targetReached && ` · ${formatDuration(progress.remainingMinutes)} to go`}
                     </span>
                   </div>
-                  <div className="relative">
-                    <ProgressBar
-                      percent={progress.percent}
-                      label={`${requirement.label}: ${progress.percent}%`}
-                      tone={
-                        requirement.kind === 'supervision_total' ||
-                        requirement.kind === 'individual_supervision' ||
-                        requirement.kind === 'group_supervision'
-                          ? 'secondary'
-                          : 'primary'
-                      }
-                    />
-                  </div>
+                  <ProgressBar
+                    percent={progress.percent}
+                    label={`${requirement.label}: ${progress.percent}%`}
+                    tone={
+                      requirement.kind === 'supervision_total' ||
+                      requirement.kind === 'individual_supervision' ||
+                      requirement.kind === 'group_supervision'
+                        ? 'secondary'
+                        : 'primary'
+                    }
+                  />
                   <div aria-hidden="true" className="mt-1 flex justify-between text-[10px] text-app-muted">
                     <span>0%</span>
                     <span>25%</span>
@@ -212,19 +263,23 @@ export function OverviewPage() {
         </Card>
 
         <div className="space-y-4">
-          {/* Deadlines */}
           <Card>
-            <h2 className="mb-2">Upcoming deadlines</h2>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-app-gold-light text-app-gold-dark">
+                <Icon name="calendar" size={17} />
+              </span>
+              <h2>Upcoming deadlines</h2>
+            </div>
             {upcoming.length === 0 ? (
               <p className="text-sm text-app-muted">No renewal periods or dated targets configured yet.</p>
             ) : (
               <ul className="space-y-2">
                 {upcoming.map((item) => (
-                  <li key={`${item.kind}-${item.id}`} className="flex items-center justify-between gap-2 text-sm">
+                  <li key={`${item.kind}-${item.id}`} className="flex items-center justify-between gap-2 border-b border-app-border/70 pb-2 text-sm last:border-0 last:pb-0">
                     <span className="truncate">{item.label}</span>
                     <Link
                       to={item.kind === 'ceu' ? '/ceus' : '/requirements'}
-                      className="shrink-0 font-medium text-app-secondary underline"
+                      className="shrink-0 font-medium text-app-secondary underline decoration-app-secondary/30 underline-offset-4"
                     >
                       {formatDisplayDate(item.date)}
                     </Link>
@@ -234,13 +289,12 @@ export function OverviewPage() {
             )}
           </Card>
 
-          {/* Quality preview */}
           <Card>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-app-primary-light text-app-primary">
+                <Icon name="shield" size={17} />
+              </span>
               <h2>Record quality</h2>
-              <Link to="/quality" className="text-sm text-app-secondary underline">
-                Review all
-              </Link>
             </div>
             {issues.length === 0 ? (
               <p className="text-sm text-app-muted">Everything looks consistent. Nice work.</p>
@@ -259,6 +313,9 @@ export function OverviewPage() {
                 )}
               </ul>
             )}
+            <Link to="/quality" className="link-quiet mt-3 inline-block">
+              Review all
+            </Link>
           </Card>
         </div>
       </div>
@@ -266,22 +323,35 @@ export function OverviewPage() {
       {/* Weekly chart + recent */}
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <h2 className="mb-3">Hours over the last 8 weeks</h2>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <p className="eyebrow">Trend</p>
+              <h2 className="mt-1">Hours over the last 8 weeks</h2>
+            </div>
+            <Link to="/reports" className="link-quiet">
+              Open reports
+            </Link>
+          </div>
           {activities.length === 0 ? (
             <p className="text-sm text-app-muted">Log an activity and this chart will fill in.</p>
           ) : (
-            <div className="h-52">
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weekly} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#718096' }} tickLine={false} axisLine={{ stroke: '#E6EAF0' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#718096' }} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6A7872' }} tickLine={false} axisLine={{ stroke: '#E6DFD1' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#6A7872' }} tickLine={false} axisLine={false} />
                   <Tooltip
                     formatter={(value) => [`${value} h`, 'Hours']}
-                    contentStyle={{ borderRadius: 8, border: '1px solid #E6EAF0', fontSize: 12 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: '1px solid #E6DFD1',
+                      fontSize: 12,
+                      boxShadow: '0 12px 28px -18px rgba(20,32,28,0.45)',
+                    }}
                   />
-                  <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="hours" radius={[6, 6, 0, 0]}>
                     {weekly.map((entry, index) => (
-                      <Cell key={entry.label} fill={index === weekly.length - 1 ? '#147D78' : '#4779A8'} />
+                      <Cell key={entry.label} fill={index === weekly.length - 1 ? '#0D5B51' : '#B98A33'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -291,9 +361,9 @@ export function OverviewPage() {
         </Card>
 
         <Card>
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <h2>Recent activities</h2>
-            <Link to="/activities" className="text-sm text-app-secondary underline">
+            <Link to="/activities" className="link-quiet">
               View all
             </Link>
           </div>
@@ -303,7 +373,7 @@ export function OverviewPage() {
             <ul className="divide-y divide-app-border">
               {recent.map((a) => (
                 <li key={a.id}>
-                  <Link to={`/activities/${a.id}`} className="block py-2 hover:bg-app-primary-light/40">
+                  <Link to={`/activities/${a.id}`} className="-mx-2 block rounded-lg px-2 py-2 transition-colors hover:bg-app-primary-light/40">
                     <p className="truncate text-sm font-medium">{a.title}</p>
                     <p className="text-xs text-app-muted">
                       {formatDisplayDate(a.date)} · {formatDuration(a.durationMinutes)}
@@ -316,37 +386,6 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {!hasRecords && (
-        <div className="mt-4">
-          <EmptyState
-            title="Your workspace is empty"
-            description="Nothing is stored in a spreadsheet or in the cloud — your records live in this browser on this device. Start by logging one activity."
-            actionLabel="Log your first activity"
-            actionTo="/activities/new?type=clinical"
-          />
-        </div>
-      )}
     </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  sub,
-  footer,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  footer?: ReactNode;
-}) {
-  return (
-    <Card>
-      <p className="text-xs font-medium uppercase tracking-wide text-app-muted">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
-      <p className="text-sm text-app-muted">{sub}</p>
-      {footer && <div className="mt-2 border-t border-app-border pt-2 text-xs text-app-muted">{footer}</div>}
-    </Card>
   );
 }

@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Icon } from './Icon';
 
 type ToastTone = 'success' | 'error' | 'info';
 
@@ -47,14 +48,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             role={t.tone === 'error' ? 'alert' : 'status'}
-            className={`pointer-events-auto max-w-md rounded-lg px-4 py-2.5 text-sm font-medium shadow-pop ${
+            className={`pointer-events-auto flex max-w-md items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium shadow-pop ring-1 ring-inset ${
               t.tone === 'success'
-                ? 'bg-app-success text-white'
+                ? 'bg-app-primary text-white ring-white/20'
                 : t.tone === 'error'
-                  ? 'bg-app-danger text-white'
-                  : 'bg-app-text text-white'
+                  ? 'bg-app-danger text-white ring-white/20'
+                  : 'bg-app-ink text-white ring-white/15'
             }`}
           >
+            <Icon name={t.tone === 'error' ? 'warning' : 'check'} size={16} />
             {t.message}
           </div>
         ))}

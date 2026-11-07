@@ -48,6 +48,7 @@ export function CeuListPage() {
     <div>
       <PageHeader
         title="CEU Tracker"
+        eyebrow="Continuing education"
         description="Continuing education records, tracked separately from clinical hours."
         actions={
           <Link to="/ceus/new" className="btn-primary">
